@@ -128,6 +128,7 @@
             height: 100%;
             display: flex;
             align-items: center;
+            z-index: 1001;
         }
 
         .logo-img {
@@ -139,6 +140,23 @@
         .logo-img:hover {
             opacity: 0.9;
             transform: scale(1.02);
+        }
+
+        /* Menu Hamburger */
+        .menu-toggle {
+            display: none;
+            cursor: pointer;
+            z-index: 1001;
+        }
+
+        .menu-toggle i {
+            font-size: 28px;
+            color: var(--prata-texto);
+        }
+
+        nav {
+            display: flex;
+            align-items: center;
         }
 
         nav ul {
@@ -816,8 +834,45 @@
             color: #FFF;
         }
 
-        /* Responsivo */
+        /* Menu Mobile */
         @media (max-width: 992px) {
+            .menu-toggle {
+                display: block;
+            }
+            
+            nav {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                width: 80%;
+                max-width: 300px;
+                height: 100vh;
+                background-color: white;
+                box-shadow: -5px 0 15px rgba(0, 0, 0, 0.1);
+                transition: right 0.3s ease;
+                flex-direction: column;
+                justify-content: center;
+                z-index: 1000;
+            }
+            
+            nav.active {
+                right: 0;
+            }
+            
+            nav ul {
+                flex-direction: column;
+                align-items: center;
+                padding: 20px;
+            }
+            
+            nav ul li {
+                margin: 15px 0;
+            }
+            
+            nav ul li a {
+                font-size: 18px;
+            }
+            
             .hero h2 {
                 font-size: 2.8rem;
             }
@@ -837,35 +892,16 @@
 
         @media (max-width: 768px) {
             header {
-                flex-direction: column;
-                height: auto;
-                padding: 15px;
-            }
-            
-            .header-scroll {
-                height: auto;
-            }
-            
-            .logo {
-                margin-bottom: 15px;
+                height: 80px;
             }
             
             .logo-img {
                 height: 120px;
             }
             
-            nav ul {
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-            
-            nav ul li {
-                margin: 0 10px 5px;
-            }
-            
             .hero {
                 height: 70vh;
-                padding-top: 120px;
+                padding-top: 80px;
             }
             
             .hero h2 {
@@ -877,7 +913,7 @@
             }
             
             .filtros {
-                top: 140px;
+                top: 80px;
                 padding: 10px 5px;
             }
             
@@ -924,7 +960,7 @@
             }
             
             .filtros {
-                top: 160px;
+                top: 80px;
                 justify-content: flex-start;
                 overflow-x: auto;
                 white-space: nowrap;
@@ -998,7 +1034,13 @@
                 <img src="logo.png" alt="S.A PRATAS 925 - Joias em Prata 925 de Alta Qualidade" class="logo-img">
             </a>
         </div>
-        <nav class="nav">
+        
+        <!-- Menu Hamburger -->
+        <div class="menu-toggle" id="menu-toggle">
+            <i class="fas fa-bars"></i>
+        </div>
+        
+        <nav id="nav">
             <ul>
                 <li><a href="#home">Home</a></li>
                 <li><a href="#produtos">Produtos</a></li>
@@ -1531,6 +1573,25 @@
         const freteResultado = document.getElementById('frete-resultado');
         const finalizarWhatsappBtn = document.getElementById('finalizar-whatsapp');
         const header = document.getElementById('header');
+        const menuToggle = document.getElementById('menu-toggle');
+        const nav = document.getElementById('nav');
+
+        // Menu Hamburger
+        menuToggle.addEventListener('click', () => {
+            nav.classList.toggle('active');
+            menuToggle.innerHTML = nav.classList.contains('active') ? 
+                '<i class="fas fa-times"></i>' : '<i class="fas fa-bars"></i>';
+        });
+
+        // Fechar menu ao clicar em um link
+        document.querySelectorAll('nav ul li a').forEach(link => {
+            link.addEventListener('click', () => {
+                if (window.innerWidth <= 992) {
+                    nav.classList.remove('active');
+                    menuToggle.innerHTML = '<i class="fas fa-bars"></i>';
+                }
+            });
+        });
 
         // Observador de Intersecção para animações
         const observer = new IntersectionObserver((entries) => {
@@ -1716,23 +1777,24 @@
             atualizarCarrinho();
         }
 
-        // Atualizar link do WhatsApp
+        // Atualizar link do WhatsApp - FUNÇÃO CORRIGIDA
         function atualizarLinkWhatsApp() {
             const subtotal = carrinho.reduce((sum, item) => sum + (item.preco * item.quantidade), 0);
             const total = subtotal + frete;
             
-            let mensagem = "Olá, gostaria de finalizar minha compra dos seguintes itens:%0A%0A";
+            let mensagem = "Olá, gostaria de finalizar minha compra na S.A PRATAS 925 com os seguintes itens:\n\n";
             
             carrinho.forEach(item => {
-                mensagem += `- ${item.nome} (${item.quantidade}x): R$ ${(item.preco * item.quantidade).toFixed(2)}%0A`;
+                mensagem += `- ${item.nome} (${item.quantidade}x): R$ ${(item.preco * item.quantidade).toFixed(2)}\n`;
             });
             
-            mensagem += `%0ASubtotal: R$ ${subtotal.toFixed(2)}%0A`;
-            mensagem += `Frete: R$ ${frete.toFixed(2)}%0A`;
-            mensagem += `Total: R$ ${total.toFixed(2)}%0A%0A`;
+            mensagem += `\n*Subtotal:* R$ ${subtotal.toFixed(2)}\n`;
+            mensagem += `*Frete:* R$ ${frete.toFixed(2)}\n`;
+            mensagem += `*Total:* R$ ${total.toFixed(2)}\n\n`;
             mensagem += "Por favor, confirme a disponibilidade e me envie as instruções para pagamento.";
             
-            finalizarWhatsappBtn.href = `https://wa.me/553899959880?text=${mensagem}`;
+            // Número corrigido para (38) 9995-9880 (formato internacional: 553899959880)
+            finalizarWhatsappBtn.href = `https://wa.me/553899959880?text=${encodeURIComponent(mensagem)}`;
         }
 
         // Máscara para CEP
