@@ -337,6 +337,23 @@
             grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
             gap: 30px;
             margin-top: 30px;
+            min-height: 300px;
+        }
+
+        .grade-produtos > div {
+            text-align: center;
+            color: var(--prata-escuro);
+            grid-column: 1/-1;
+        }
+
+        .grade-produtos > div h3 {
+            font-size: 1.5rem;
+            margin-bottom: 15px;
+        }
+
+        .grade-produtos > div p {
+            font-size: 1rem;
+            color: var(--prata-medio);
         }
 
         .produto {
@@ -347,6 +364,14 @@
             transition: var(--transicao);
             position: relative;
             border: 1px solid #f0f0f0;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.5s ease;
+        }
+
+        .produto.visible {
+            opacity: 1;
+            transform: translateY(0);
         }
 
         .produto:hover {
@@ -1080,7 +1105,10 @@
         </div>
         
         <div class="grade-produtos" id="grade-produtos">
-            <!-- Os produtos serão inseridos aqui dinamicamente -->
+            <div style="grid-column: 1/-1; text-align: center; padding: 50px;">
+                <h3>Selecione uma categoria para ver nossos produtos</h3>
+                <p>Clique em um dos filtros acima para explorar nossa coleção</p>
+            </div>
         </div>
     </section>
 
@@ -1614,11 +1642,30 @@
         });
 
         // Carregar Produtos
-        function carregarProdutos(categoria = 'todos') {
+        function carregarProdutos(categoria) {
             gradeProdutos.innerHTML = '';
-            const produtosFiltrados = categoria === 'todos' 
-                ? produtos 
-                : produtos.filter(produto => produto.categoria === categoria);
+            
+            if (!categoria) {
+                gradeProdutos.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 50px;">
+                        <h3>Selecione uma categoria para ver nossos produtos</h3>
+                        <p>Clique em um dos filtros acima para explorar nossa coleção</p>
+                    </div>
+                `;
+                return;
+            }
+
+            const produtosFiltrados = produtos.filter(produto => produto.categoria === categoria);
+
+            if (produtosFiltrados.length === 0) {
+                gradeProdutos.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 50px;">
+                        <h3>Nenhum produto encontrado nesta categoria</h3>
+                        <p>Por favor, selecione outra categoria</p>
+                    </div>
+                `;
+                return;
+            }
 
             produtosFiltrados.forEach(produto => {
                 const produtoElement = document.createElement('div');
@@ -1636,6 +1683,11 @@
                     </div>
                 `;
                 gradeProdutos.appendChild(produtoElement);
+                
+                // Adicionar animação de fade-in para cada produto
+                setTimeout(() => {
+                    produtoElement.classList.add('visible');
+                }, 100);
             });
 
             // Adicionar eventos aos botões
@@ -1772,7 +1824,7 @@
             atualizarCarrinho();
         }
 
-        // Atualizar link do WhatsApp - FUNÇÃO CORRIGIDA
+        // Atualizar link do WhatsApp
         function atualizarLinkWhatsApp() {
             const subtotal = carrinho.reduce((sum, item) => sum + (item.preco * item.quantidade), 0);
             const total = subtotal + frete;
@@ -1788,7 +1840,6 @@
             mensagem += `*Total:* R$ ${total.toFixed(2)}\n\n`;
             mensagem += "Por favor, confirme a disponibilidade e me envie as instruções para pagamento.";
             
-            // Número corrigido para (38) 9995-9880 (formato internacional: 553899959880)
             finalizarWhatsappBtn.href = `https://wa.me/553899959880?text=${encodeURIComponent(mensagem)}`;
         }
 
@@ -1843,14 +1894,13 @@
 
         // Inicializar
         document.addEventListener('DOMContentLoaded', () => {
-            carregarProdutos();
+            carregarProdutos(); // Inicia sem mostrar produtos
+            
             // Atualizar contador do carrinho ao carregar a página
             carrinhoContador.textContent = carrinho.reduce((sum, item) => sum + item.quantidade, 0);
             
-            // Adicionar classe ativa ao primeiro botão de filtro
-            if (botoesFiltro.length > 0) {
-                botoesFiltro[0].classList.add('ativo');
-            }
+            // Não ativar nenhum botão de filtro inicialmente
+            botoesFiltro.forEach(btn => btn.classList.remove('ativo'));
             
             // Verificar se há hash na URL e scrollar para a seção
             if (window.location.hash) {
