@@ -361,9 +361,11 @@
         }
 
         .produto-img {
-            width: 100%;
+            width: auto;
             height: 100%;
-            object-fit: cover;
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
             transition: transform 0.5s ease;
         }
 
@@ -1624,7 +1626,7 @@
                 produtoElement.setAttribute('data-anime', 'up');
                 produtoElement.innerHTML = `
                     <div class="produto-img-container">
-                        <img src="${produto.imagem}" alt="${produto.nome}" class="produto-img" onerror="this.src='placeholder.jpg'">
+                        <img src="${produto.imagem}" alt="${produto.nome}" class="produto-img" onerror="this.src='imagem-padrao.jpg'">
                     </div>
                     <div class="produto-info">
                         <h3>${produto.nome}</h3>
